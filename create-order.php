@@ -10,16 +10,34 @@ require_csrf();
 $bundleId = filter_var($_POST['bundle_id'] ?? null, FILTER_VALIDATE_INT);
 $name = trim((string) ($_POST['customer_name'] ?? ''));
 $email = trim((string) ($_POST['customer_email'] ?? ''));
-$phoneInput = trim((string) ($_POST['customer_phone'] ?? ''));
+$deliveryPhoneInput = trim((string) ($_POST['customer_phone'] ?? ''));
+$paymentPhoneInput = trim((string) ($_POST['payment_phone'] ?? ''));
 $paymentOperator = (string) ($_POST['payment_operator'] ?? '');
-$phoneDigits = preg_replace('/\D+/', '', $phoneInput) ?? '';
-$phone = str_starts_with($phoneInput, '+') ? '+' . $phoneDigits : '+237' . ltrim($phoneDigits, '0');
-$nameParts = preg_split('/\s+/', $name, 2);
+$deliveryPhone = normalize_cameroon_phone($deliveryPhoneInput);
+$paymentPhone = normalize_cameroon_phone($paymentPhoneInput);
 
-if (!$bundleId || mb_strlen($name) < 3 || count($nameParts ?: []) < 2 || !filter_var($email, FILTER_VALIDATE_EMAIL)
-    || !preg_match('/^\+237[2368]\d{7,8}$/', $phone)
-    || !in_array($paymentOperator, ['orange', 'mtn'], true)) {
-    flash('Vérifiez le nom, l’e-mail, le numéro camerounais et le moyen de paiement.', 'error');
+if (!$bundleId) {
+    flash('Ce forfait est introuvable. Choisissez à nouveau un forfait.', 'error');
+    redirect('/forfaits.php');
+}
+if (mb_strlen($name) < 2) {
+    flash('Saisissez votre nom.', 'error');
+    redirect('/checkout.php?id=' . (int) $bundleId);
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    flash('Vérifiez votre adresse e-mail.', 'error');
+    redirect('/checkout.php?id=' . (int) $bundleId);
+}
+if (!preg_match('/^\+237[2368]\d{7,8}$/', $deliveryPhone)) {
+    flash('Vérifiez le numéro qui va recevoir le forfait.', 'error');
+    redirect('/checkout.php?id=' . (int) $bundleId);
+}
+if (!preg_match('/^\+237[2368]\d{7,8}$/', $paymentPhone)) {
+    flash('Vérifiez le numéro qui va effectuer le paiement.', 'error');
+    redirect('/checkout.php?id=' . (int) $bundleId);
+}
+if (!in_array($paymentOperator, ['orange', 'mtn'], true)) {
+    flash('Choisissez Orange Money ou MTN Mobile Money.', 'error');
     redirect('/checkout.php?id=' . (int) ($bundleId ?: 0));
 }
 if (!bumxpress_is_configured()) {
@@ -39,12 +57,12 @@ $publicRef = 'FP-' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
 $trackingToken = bin2hex(random_bytes(32));
 $now = date('Y-m-d H:i:s');
 $insert = db()->prepare("INSERT INTO orders (
-    public_ref, tracking_token_hash, customer_name, customer_phone, customer_email, operator_code,
+    public_ref, tracking_token_hash, customer_name, customer_phone, payment_phone, customer_email, operator_code,
     bundle_id, bundle_name, volume_label, validity_days, amount, payment_operator, payment_status,
     delivery_status, created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'initiating', 'waiting', ?)");
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'initiating', 'waiting', ?)");
 $insert->execute([
-    $publicRef, hash('sha256', $trackingToken), $name, $phone, $email, $bundle['operator_code'],
+    $publicRef, hash('sha256', $trackingToken), $name, $deliveryPhone, $paymentPhone, $email, $bundle['operator_code'],
     $bundle['id'], $bundle['name'], $bundle['volume_label'], $bundle['validity_days'],
     $bundle['price'], $paymentOperator, $now,
 ]);
@@ -52,7 +70,7 @@ $orderId = (int) db()->lastInsertId();
 remember_order((string) $orderId, $trackingToken);
 
 try {
-    $customer = create_bumxpress_customer($publicRef, $name, $email, $phone, 'customer_' . $publicRef);
+    $customer = create_bumxpress_customer($publicRef, $name, $email, $paymentPhone, 'customer_' . $publicRef);
     $customerId = (string) ($customer['id'] ?? '');
     if ($customerId === '') {
         throw new RuntimeException('Bumxpress n’a pas retourné l’identifiant du client.');
@@ -82,7 +100,8 @@ try {
             'public_ref' => $publicRef,
             'provider_quote_id' => $quoteId,
             'payment_operator' => $paymentOperator,
-            'customer_phone' => $phone,
+            'customer_phone' => $deliveryPhone,
+            'payment_phone' => $paymentPhone,
         ]);
         $payin = create_bumxpress_payin($order);
         $payinId = (string) ($payin['id'] ?? '');

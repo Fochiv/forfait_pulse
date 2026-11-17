@@ -96,7 +96,7 @@ function create_bumxpress_payin(array $order, string $otpCode = ''): array
         'quote_id' => $quote,
         'merchant_reference' => $order['public_ref'],
         'merchant_metadata' => ['order_ref' => $order['public_ref']],
-        'source' => ['phone' => $order['customer_phone']],
+        'source' => ['phone' => $order['payment_phone'] ?? $order['customer_phone']],
     ];
     if ($otpCode !== '') {
         $payload['otp_code'] = $otpCode;

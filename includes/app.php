@@ -107,6 +107,18 @@ function whatsapp_url(): string
     return 'https://wa.me/237678519844';
 }
 
+function normalize_cameroon_phone(string $input): string
+{
+    $digits = preg_replace('/\D+/', '', trim($input)) ?? '';
+    if (str_starts_with($digits, '00')) {
+        $digits = substr($digits, 2);
+    }
+    if (str_starts_with($digits, '237')) {
+        return '+' . $digits;
+    }
+    return '+237' . ltrim($digits, '0');
+}
+
 function icon(string $name, int $size = 20): string
 {
     $paths = [

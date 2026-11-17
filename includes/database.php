@@ -65,7 +65,8 @@ function initialize_database(PDO $pdo, string $driver): void
     )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS orders (
         id {$id}, public_ref VARCHAR(40) NOT NULL UNIQUE, tracking_token_hash VARCHAR(64) NOT NULL,
-        customer_name VARCHAR(160) NOT NULL, customer_phone VARCHAR(32) NOT NULL, customer_email VARCHAR(190) NOT NULL,
+        customer_name VARCHAR(160) NOT NULL, customer_phone VARCHAR(32) NOT NULL,
+        payment_phone VARCHAR(32) NOT NULL, customer_email VARCHAR(190) NOT NULL,
         operator_code VARCHAR(20) NOT NULL, bundle_id {$integer} NULL, bundle_name VARCHAR(120) NOT NULL,
         volume_label VARCHAR(80) NOT NULL, validity_days INTEGER NOT NULL, amount INTEGER NOT NULL,
         payment_operator VARCHAR(24) NOT NULL, payment_status VARCHAR(24) NOT NULL DEFAULT 'initiating',
@@ -96,6 +97,14 @@ function initialize_database(PDO $pdo, string $driver): void
         id {$id}, event_id VARCHAR(120) NOT NULL UNIQUE, event_type VARCHAR(80) NOT NULL,
         received_at {$date} NOT NULL, payload_hash VARCHAR(64) NOT NULL
     )");
+
+    $orderColumns = $driver === 'mysql'
+        ? array_column($pdo->query('SHOW COLUMNS FROM orders')->fetchAll(PDO::FETCH_ASSOC), 'Field')
+        : array_column($pdo->query('PRAGMA table_info(orders)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    if (!in_array('payment_phone', $orderColumns, true)) {
+        $pdo->exec('ALTER TABLE orders ADD COLUMN payment_phone VARCHAR(32) NULL');
+        $pdo->exec("UPDATE orders SET payment_phone = customer_phone WHERE payment_phone IS NULL OR payment_phone = ''");
+    }
 
     $count = (int) $pdo->query('SELECT COUNT(*) FROM bundles')->fetchColumn();
     if ($count === 0) {

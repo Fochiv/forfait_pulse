@@ -28,12 +28,13 @@ require __DIR__ . '/includes/header.php';
         <?php endif; ?>
         <div class="row g-3 align-items-start">
             <div class="col-lg-7">
-                <form class="form-card" action="/create-order.php" method="post" novalidate>
+                <form class="form-card" action="/create-order.php" method="post">
                     <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
                     <input type="hidden" name="bundle_id" value="<?= (int) $bundle['id'] ?>">
                     <div class="form-grid two-col">
                         <div class="form-group"><label for="customer_name" data-i18n="full_name">Nom complet</label><input class="form-control" id="customer_name" name="customer_name" autocomplete="name" required minlength="2" maxlength="160" placeholder="Ex. Awa Ngu"></div>
-                        <div class="form-group"><label for="customer_phone" data-i18n="customer_number">Numéro du client</label><input class="form-control" id="customer_phone" name="customer_phone" inputmode="tel" autocomplete="tel" required maxlength="18" placeholder="6XX XXX XXX"><p class="form-help">Numéro camerounais auquel le forfait sera livré.</p></div>
+                        <div class="form-group"><label for="customer_phone" data-i18n="delivery_number">Numéro qui va recevoir le forfait</label><input class="form-control" id="customer_phone" name="customer_phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="22" placeholder="6XX XXX XXX ou +237 6XX XXX XXX"></div>
+                        <div class="form-group"><label for="payment_phone" data-i18n="payment_phone">Numéro qui va effectuer le paiement</label><input class="form-control" id="payment_phone" name="payment_phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="22" placeholder="6XX XXX XXX ou +237 6XX XXX XXX"><p class="form-help" data-i18n="payment_phone_help">Numéro Orange Money ou MTN Mobile Money qui sera débité.</p></div>
                         <div class="form-group" style="grid-column:1/-1"><label for="customer_email" data-i18n="email_address">Adresse e-mail</label><input class="form-control" id="customer_email" name="customer_email" type="email" autocomplete="email" required maxlength="190" placeholder="vous@exemple.com"></div>
                         <div class="form-group" style="grid-column:1/-1">
                             <label data-i18n="payment_method">Moyen de paiement</label>
@@ -44,7 +45,6 @@ require __DIR__ . '/includes/header.php';
                         </div>
                         <div style="grid-column:1/-1">
                             <button class="btn-primary w-100" type="submit" <?= !bumxpress_is_configured() ? 'disabled' : '' ?>><span data-i18n="continue_payment">Continuer vers le paiement</span> <?= icon('arrow', 18) ?></button>
-                            <p class="form-help mt-2">Le paiement est confirmé par Bumxpress. L’admin livre ensuite le forfait manuellement.</p>
                         </div>
                     </div>
                 </form>

@@ -15,10 +15,6 @@ require __DIR__ . '/includes/header.php';
             <h1><span data-i18n="hero_choose">Choisissez votre</span> <span data-i18n="operator_word">opérateur</span></h1>
             <p class="hero-copy" data-i18n="intro_copy">Des forfaits Orange, MTN et Camtel au Cameroun, au prix affiché.</p>
         </div>
-        <div class="hero-visual" aria-label="Forfait Pulse">
-            <div class="hero-glow"></div>
-            <img src="/logo.png" alt="Logo Forfait Pulse">
-        </div>
     </div>
 </section>
 
