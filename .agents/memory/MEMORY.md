@@ -1,0 +1,1 @@
+- [Phone-only order lookup](order-lookup-policy.md) — The user chose phone-only order access instead of SMS verification; preserve this product choice unless they change it.
