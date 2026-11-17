@@ -1,0 +1,4 @@
+/storage/*.sqlite
+/storage/*.sqlite-*
+/config/private.local.php
+/attached_assets/
