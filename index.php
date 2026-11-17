@@ -38,11 +38,6 @@ require __DIR__ . '/includes/header.php';
                 </button>
             <?php endforeach; ?>
         </div>
-        <div class="trust-row">
-            <div class="trust-item"><?= icon('shield', 20) ?><span data-i18n="secure_payment">Paiement sécurisé</span></div>
-            <div class="trust-item"><?= icon('truck', 20) ?><span data-i18n="fast_delivery">Livraison rapide</span></div>
-            <div class="trust-item"><?= icon('check', 20) ?><span data-i18n="no_account">Sans compte client</span></div>
-        </div>
     </div>
 </section>
 

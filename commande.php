@@ -4,14 +4,14 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bumxpress.php';
 $activePage = 'orders';
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0;
-$token = $_SESSION['customer_orders'][(string) $id] ?? '';
-$stmt = db()->prepare('SELECT * FROM orders WHERE id = ? AND tracking_token_hash = ?');
-$stmt->execute([$id, is_string($token) ? hash('sha256', $token) : '']);
+$stmt = db()->prepare('SELECT * FROM orders WHERE id = ?');
+$stmt->execute([$id]);
 $order = $stmt->fetch();
-if (!$order) {
+if (!$order || !order_matches_phone_lookup($order)) {
     http_response_code(404);
     $order = null;
 } else {
+    $_SESSION['order_lookup_at'] = time();
     $order = sync_order_from_provider($order);
     $fresh = db()->prepare('SELECT * FROM orders WHERE id = ?');
     $fresh->execute([$id]);
@@ -46,7 +46,7 @@ require __DIR__ . '/includes/header.php';
                     <?php if (empty($order['provider_payin_id'])): ?>
                         Le paiement n’a pas pu être lancé. Aucune demande de confirmation n’a été envoyée sur votre téléphone. Vérifiez les informations ou contactez l’assistance.
                     <?php else: ?>
-                        Le paiement n’a pas été confirmé. <?= h($order['failure_reason'] ?? '') ?>
+                        Le paiement n’a pas été confirmé. Vérifiez les instructions de votre opérateur ou contactez l’assistance.
                     <?php endif; ?>
                 </div>
             <?php elseif ($order['payment_status'] === 'awaiting_otp' && ($customerAction['type'] ?? '') === 'otp_before'): ?>

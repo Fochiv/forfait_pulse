@@ -93,6 +93,9 @@ function initialize_database(PDO $pdo, string $driver): void
     $pdo->exec("CREATE TABLE IF NOT EXISTS admin_attempts (
         id {$id}, ip_hash VARCHAR(64) NOT NULL, attempted_at {$date} NOT NULL, succeeded INTEGER NOT NULL DEFAULT 0
     )");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS order_lookup_attempts (
+        id {$id}, ip_hash VARCHAR(64) NOT NULL, phone_hash VARCHAR(64) NOT NULL, attempted_at {$date} NOT NULL
+    )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS webhook_events (
         id {$id}, event_id VARCHAR(120) NOT NULL UNIQUE, event_type VARCHAR(80) NOT NULL,
         received_at {$date} NOT NULL, payload_hash VARCHAR(64) NOT NULL

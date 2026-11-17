@@ -41,7 +41,7 @@ if (!in_array($paymentOperator, ['orange', 'mtn'], true)) {
     redirect('/checkout.php?id=' . (int) ($bundleId ?: 0));
 }
 if (!bumxpress_is_configured()) {
-    flash('Le paiement est indisponible : les identifiants Bumxpress et le secret webhook ne sont pas configurés.', 'warning');
+    flash('Le paiement en ligne est momentanément indisponible. Réessayez plus tard.', 'warning');
     redirect('/checkout.php?id=' . (int) $bundleId);
 }
 
@@ -67,7 +67,6 @@ $insert->execute([
     $bundle['price'], $paymentOperator, $now,
 ]);
 $orderId = (int) db()->lastInsertId();
-remember_order((string) $orderId, $trackingToken);
 
 try {
     $customer = create_bumxpress_customer($publicRef, $name, $email, $paymentPhone, 'customer_' . $publicRef);
@@ -118,4 +117,5 @@ try {
         ->execute([substr($exception->getMessage(), 0, 255), $orderId]);
 }
 
-redirect('/commande.php?id=' . $orderId);
+flash('Votre commande a été enregistrée. Saisissez le numéro utilisé pour recevoir ou payer le forfait afin de la retrouver.', 'success');
+redirect('/mes-commandes.php');

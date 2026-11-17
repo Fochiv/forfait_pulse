@@ -119,6 +119,31 @@ function normalize_cameroon_phone(string $input): string
     return '+237' . ltrim($digits, '0');
 }
 
+function current_order_lookup_phone(): ?string
+{
+    $phone = $_SESSION['order_lookup_phone'] ?? null;
+    $lookedUpAt = (int) ($_SESSION['order_lookup_at'] ?? 0);
+    if (!is_string($phone) || $phone === '' || $lookedUpAt === 0 || time() - $lookedUpAt > 1200) {
+        unset($_SESSION['order_lookup_phone'], $_SESSION['order_lookup_at']);
+        return null;
+    }
+    return $phone;
+}
+
+function order_matches_phone_lookup(array $order): bool
+{
+    $phone = current_order_lookup_phone();
+    if ($phone === null) {
+        return false;
+    }
+    foreach ([$order['customer_phone'] ?? '', $order['payment_phone'] ?? ''] as $orderPhone) {
+        if (is_string($orderPhone) && $orderPhone !== '' && hash_equals($orderPhone, $phone)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function icon(string $name, int $size = 20): string
 {
     $paths = [
@@ -136,6 +161,7 @@ function icon(string $name, int $size = 20): string
         'star' => '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/>',
         'wallet' => '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M16 15h2"/>',
         'chart' => '<path d="M4 19V5m0 14h17"/><path d="m7 15 4-4 3 2 6-7"/>',
+        'search' => '<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/>',
         'logout' => '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>',
     ];
     $body = $paths[$name] ?? $paths['grid'];

@@ -8,9 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_csrf();
 
 $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
-$token = $_SESSION['customer_orders'][(string) $id] ?? '';
 $otp = trim((string) ($_POST['otp_code'] ?? ''));
-if (!$id || !is_string($token) || $token === '' || !preg_match('/^[A-Za-z0-9]{3,12}$/', $otp)) {
+if (!$id || !preg_match('/^[A-Za-z0-9]{3,12}$/', $otp)) {
     flash('Le code saisi est invalide.', 'error');
     redirect('/mes-commandes.php');
 }
@@ -24,13 +23,14 @@ if ((int) ($attemptData['count'] ?? 0) >= 5) {
     flash('Trop de tentatives de code. Réessayez plus tard ou contactez l’assistance.', 'error');
     redirect('/commande.php?id=' . $id);
 }
-$stmt = db()->prepare("SELECT * FROM orders WHERE id = ? AND tracking_token_hash = ? AND payment_status IN ('awaiting_otp','pending')");
-$stmt->execute([$id, hash('sha256', $token)]);
+$stmt = db()->prepare("SELECT * FROM orders WHERE id = ? AND payment_status IN ('awaiting_otp','pending')");
+$stmt->execute([$id]);
 $order = $stmt->fetch();
-if (!$order) {
+if (!$order || !order_matches_phone_lookup($order)) {
     flash('Cette commande ne peut plus être autorisée.', 'error');
     redirect('/mes-commandes.php');
 }
+$_SESSION['order_lookup_at'] = time();
 try {
     if (!empty($order['provider_payin_id']) && $order['payment_status'] === 'pending') {
         $current = bumxpress_request('/payins/' . rawurlencode((string) $order['provider_payin_id']));

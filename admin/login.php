@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_regenerate_id(true);
         $_SESSION['admin_authenticated'] = true;
         $_SESSION['admin_since'] = time();
+        $_SESSION['last_admin_activity'] = time();
         redirect('/admin/');
     }
     $error = $locked

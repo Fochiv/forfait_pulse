@@ -14,9 +14,6 @@
       mobile_internet: "INTERNET MOBILE, SIMPLEMENT",
       subtitle: "Trouvez le forfait internet qui vous convient.",
       see_plans: "Voir les forfaits",
-      secure_payment: "Paiement sécurisé",
-      fast_delivery: "Livraison rapide",
-      no_account: "Sans compte client",
       how_title: "Comment ça marche",
       step_one: "Choisissez votre forfait",
       step_two: "Payez avec Mobile Money",
@@ -47,7 +44,7 @@
       internet_label: "Internet",
       validity_label: "Validité",
       total_label: "Total",
-      secure_payment_note: "Vos données de paiement restent chez Bumxpress. Forfait Pulse ne demande jamais votre code PIN Mobile Money.",
+      secure_payment_note: "Forfait Pulse ne demande jamais votre code PIN Mobile Money.",
       orders_subtitle: "Suivez le paiement et la livraison de vos forfaits.",
       buy: "Acheter",
       valid_for: "Valable",
@@ -58,7 +55,11 @@
       filter_weekly: "Hebdomadaires",
       filter_monthly: "Mensuels",
       no_orders: "Aucune commande pour le moment.",
-      no_orders_help: "Choisissez un forfait pour commencer."
+      no_orders_help: "Choisissez un forfait pour commencer.",
+      order_lookup_title: "Retrouver mes commandes",
+      order_lookup_number: "Numéro de téléphone",
+      order_lookup_button: "Rechercher mes commandes",
+      order_lookup_empty: "Aucune commande trouvée pour ce numéro."
     },
     en: {
       nav_home: "Home",
@@ -74,9 +75,6 @@
       mobile_internet: "MOBILE INTERNET, MADE SIMPLE",
       subtitle: "Find the data bundle that works for you.",
       see_plans: "View bundles",
-      secure_payment: "Secure payment",
-      fast_delivery: "Quick delivery",
-      no_account: "No customer account",
       how_title: "How it works",
       step_one: "Choose your bundle",
       step_two: "Pay with Mobile Money",
@@ -107,7 +105,7 @@
       internet_label: "Data",
       validity_label: "Validity",
       total_label: "Total",
-      secure_payment_note: "Your payment details stay with Bumxpress. Forfait Pulse never asks for your Mobile Money PIN.",
+      secure_payment_note: "Forfait Pulse never asks for your Mobile Money PIN.",
       orders_subtitle: "Track payment and delivery for your bundles.",
       buy: "Buy",
       valid_for: "Valid for",
@@ -118,7 +116,11 @@
       filter_weekly: "Weekly",
       filter_monthly: "Monthly",
       no_orders: "No orders yet.",
-      no_orders_help: "Choose a bundle to get started."
+      no_orders_help: "Choose a bundle to get started.",
+      order_lookup_title: "Find my orders",
+      order_lookup_number: "Phone number",
+      order_lookup_button: "Find my orders",
+      order_lookup_empty: "No orders found for this number."
     }
   };
 
