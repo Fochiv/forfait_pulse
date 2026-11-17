@@ -18,7 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hash = defined('FORFAIT_PULSE_ADMIN_PASSWORD_HASH')
         ? FORFAIT_PULSE_ADMIN_PASSWORD_HASH
         : env_value('ADMIN_PASSWORD_HASH');
-    $valid = !$locked && $hash !== '' && password_verify($password, $hash);
+    $secretPassword = env_value('FORFAIT_PULSE_ADMIN_PASSWORD');
+    $valid = !$locked && ($secretPassword !== ''
+        ? hash_equals($secretPassword, $password)
+        : ($hash !== '' && password_verify($password, $hash)));
     db()->prepare('INSERT INTO admin_attempts (ip_hash, attempted_at, succeeded) VALUES (?, ?, ?)')
         ->execute([$ipHash, date('Y-m-d H:i:s'), $valid ? 1 : 0]);
     if ($valid) {
@@ -31,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $error = $locked
         ? 'Trop de tentatives. Réessayez dans 15 minutes.'
-        : ($hash === '' ? 'Le mot de passe admin n’est pas configuré.' : 'Mot de passe incorrect.');
+        : ($hash === '' && $secretPassword === '' ? 'Le mot de passe admin n’est pas configuré.' : 'Mot de passe incorrect.');
 }
 $pageTitle = 'Connexion admin';
 $currentLang = language();
