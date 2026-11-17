@@ -42,7 +42,13 @@ require __DIR__ . '/includes/header.php';
             <div class="summary-row"><span>Montant</span><strong><?= money($order['amount']) ?></strong></div>
             <div class="summary-row"><span>Paiement</span><strong><?= $order['payment_operator'] === 'orange' ? 'Orange Money' : 'MTN Mobile Money' ?></strong></div>
             <?php if ($order['payment_status'] === 'failed'): ?>
-                <div class="notice notice-error mt-3">Le paiement n’a pas été confirmé. <?= h($order['failure_reason'] ?? '') ?></div>
+                <div class="notice notice-error mt-3">
+                    <?php if (empty($order['provider_payin_id'])): ?>
+                        Le paiement n’a pas pu être lancé. Aucune demande de confirmation n’a été envoyée sur votre téléphone. Vérifiez les informations ou contactez l’assistance.
+                    <?php else: ?>
+                        Le paiement n’a pas été confirmé. <?= h($order['failure_reason'] ?? '') ?>
+                    <?php endif; ?>
+                </div>
             <?php elseif ($order['payment_status'] === 'awaiting_otp' && ($customerAction['type'] ?? '') === 'otp_before'): ?>
                 <div class="notice notice-warning mt-3">
                     <strong>Une action est nécessaire pour continuer le paiement.</strong>
@@ -75,7 +81,6 @@ require __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
-            <div class="callout mt-3"><?= icon('clock', 19) ?><p>Le forfait est livré manuellement après la confirmation du paiement. Cette page se met à jour lorsque le statut change.</p></div>
             <a class="btn-outline mt-3" href="/mes-commandes.php">Retour à mes commandes</a>
         </article>
     <?php endif; ?>

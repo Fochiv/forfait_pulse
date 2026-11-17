@@ -59,7 +59,7 @@ function bumxpress_request(string $path, ?array $payload = null, ?string $idempo
 function bumxpress_operator(string $operator): string
 {
     return match ($operator) {
-        'orange' => 'CM_ORANGE_MONEY',
+        'orange' => 'CM_ORANGE_MOMO',
         'mtn' => 'CM_MTN_MOMO',
         default => throw new InvalidArgumentException('Choisissez Orange Money ou MTN Mobile Money.'),
     };
