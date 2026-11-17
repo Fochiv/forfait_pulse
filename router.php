@@ -2,7 +2,8 @@
 declare(strict_types=1);
 
 $path = rawurldecode((string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH));
-if (preg_match('~^/(?:\.(?!well-known(?:/|$))|attached_assets|config|includes|storage)(?:/|$)~i', $path)
+if (preg_match('~^/(?!\.well-known(?:/|$))\.[^/]+(?:/|$)~i', $path)
+    || preg_match('~^/(?:attached_assets|config|includes|storage)(?:/|$)~i', $path)
     || preg_match('~^/replit\.md$~i', $path)) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');

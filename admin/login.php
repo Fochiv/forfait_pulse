@@ -58,7 +58,7 @@ $currentLang = language();
         <p class="note-muted mb-4">Accès réservé à l’administration de Forfait Pulse.</p>
         <?php if ($error): ?><div class="notice notice-error"><?= h($error) ?></div><?php endif; ?>
         <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-        <input type="hidden" name="username" autocomplete="username" value="admin">
+        <input class="visually-hidden" type="text" name="username" autocomplete="username" tabindex="-1" value="admin" aria-hidden="true" readonly>
         <div class="form-group"><label for="password">Mot de passe</label><input class="form-control" id="password" name="password" type="password" required autocomplete="current-password"></div>
         <button class="btn-primary w-100 mt-3" type="submit"><?= icon('lock', 17) ?> Se connecter</button>
         <p class="note-muted mt-3 mb-0">Les tentatives répétées sont temporairement bloquées.</p>
