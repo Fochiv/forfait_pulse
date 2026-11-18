@@ -193,5 +193,37 @@
     });
   });
 
+  const payoutForm = document.querySelector("[data-payout-form]");
+  if (payoutForm) {
+    const budgetInput = payoutForm.querySelector("[data-payout-budget]");
+    const netInput = payoutForm.querySelector("[data-payout-net]");
+    const feeText = payoutForm.querySelector("[data-payout-fee]");
+    const feeRate = Number(payoutForm.dataset.payoutFeeRate) || 0.015;
+    const formatter = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+    const formatMoney = (amount) => `${formatter.format(amount)} FCFA`;
+
+    const updatePayoutEstimate = () => {
+      const budget = Math.max(0, Math.trunc(Number(budgetInput.value) || 0));
+      const net = Math.max(0, Math.round(budget * (1 - feeRate)));
+      const fee = budget - net;
+      netInput.value = formatMoney(net);
+      feeText.textContent = budget > 0
+        ? `Frais estimés à 1,5 % : ${formatMoney(fee)}. Le devis final peut ajuster ce montant.`
+        : "Les frais estimés à 1,5 % s’afficheront ici.";
+    };
+
+    budgetInput.addEventListener("input", updatePayoutEstimate);
+    updatePayoutEstimate();
+    payoutForm.addEventListener("submit", (event) => {
+      const budget = Math.max(0, Math.trunc(Number(budgetInput.value) || 0));
+      const net = Math.max(0, Math.round(budget * (1 - feeRate)));
+      const confirmed = window.confirm(
+        `Ce retrait peut envoyer de l’argent réel. Budget total : ${formatMoney(budget)}. ` +
+        `Montant net estimé reçu : ${formatMoney(net)}. Confirmer le retrait ?`
+      );
+      if (!confirmed) event.preventDefault();
+    });
+  }
+
   applyLanguage(lang);
 })();

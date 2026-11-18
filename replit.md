@@ -11,7 +11,9 @@
 
 Upload the project files directly into `public_html`. The root `index.php` is the customer home page and `webhook.php` remains at the site root.
 
-Configure PHP 8+ with PDO MySQL and cURL. Set `DB_DRIVER=mysql`, `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` for the Hostinger database. Keep database credentials and the admin password hash outside version control. On Replit, the `FORFAIT_PULSE_ADMIN_PASSWORD` secret overrides the local hash. Configure the Bumxpress API key, API secret, and webhook signing secret in the hosting environment; use the production environment only after validating the merchant account and a real test transaction.
+Configure PHP 8.2+ with PDO MySQL and cURL. Set `DB_DRIVER=mysql`, `DB_HOST=localhost`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` for the Hostinger database. If PHP environment variables are unavailable on the hosting plan, create a fresh `config/private.local.php` there to set them with `putenv`; never upload the Replit copy or commit this file. The root `.htaccess` blocks web access to `config/`. Replit secrets do not transfer to Hostinger: configure a new admin password, session secret, and Bumxpress API and webhook secrets there. Use sandbox credentials first and switch to production only after validating the merchant account and a test transaction.
+
+Do not upload the Replit SQLite file as the production database. The MySQL schema and starter bundle catalog are initialized on first request; existing preview orders are not copied automatically.
 
 Set the Bumxpress webhook URL to `https://forfait-pulse-cm.top/webhook.php`. The endpoint verifies the signed raw request body and records event IDs to prevent duplicate processing.
 
@@ -25,5 +27,5 @@ Bundle delivery is manual: after the signed Bumxpress payin event confirms the e
 - Bumxpress documents quote-backed payins and payouts as asynchronous. Final payment state comes from signed webhooks, not the browser.
 - The published API documentation does not expose a wallet-balance read endpoint. The admin dashboard links to the Bumxpress merchant portal rather than inventing a balance.
 - Select `BUMXPRESS_ENVIRONMENT=sandbox` while using sandbox credentials. Production credentials and production mode can move real money.
-- The admin payout form sends a real payout when production mode is configured and submitted. It requires a recipient first name, last name, email, phone, operator, and amount.
+- The admin payout form treats the entered amount as the total withdrawal budget, estimates a 1.5% payout fee, and sends the remaining net amount. The webhook verifies that net send amount.
 - In a Hostinger deployment, configure the secure values and database settings in hosting configuration, then register the webhook URL and signing secret in Bumxpress.

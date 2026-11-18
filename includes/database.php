@@ -80,7 +80,7 @@ function initialize_database(PDO $pdo, string $driver): void
         quote_id VARCHAR(80) NULL, provider_payout_id VARCHAR(80) NULL UNIQUE,
         recipient_name VARCHAR(160) NOT NULL, recipient_phone VARCHAR(32) NOT NULL,
         recipient_email VARCHAR(190) NOT NULL, operator_code VARCHAR(24) NOT NULL,
-        amount INTEGER NOT NULL, status VARCHAR(24) NOT NULL DEFAULT 'initiating',
+        amount INTEGER NOT NULL, budget_amount {$integer} NULL, status VARCHAR(24) NOT NULL DEFAULT 'initiating',
         failure_reason VARCHAR(255) NULL, created_at {$date} NOT NULL, completed_at {$date} NULL
     )");
     $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
@@ -107,6 +107,13 @@ function initialize_database(PDO $pdo, string $driver): void
     if (!in_array('payment_phone', $orderColumns, true)) {
         $pdo->exec('ALTER TABLE orders ADD COLUMN payment_phone VARCHAR(32) NULL');
         $pdo->exec("UPDATE orders SET payment_phone = customer_phone WHERE payment_phone IS NULL OR payment_phone = ''");
+    }
+
+    $withdrawalColumns = $driver === 'mysql'
+        ? array_column($pdo->query('SHOW COLUMNS FROM withdrawals')->fetchAll(PDO::FETCH_ASSOC), 'Field')
+        : array_column($pdo->query('PRAGMA table_info(withdrawals)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    if (!in_array('budget_amount', $withdrawalColumns, true)) {
+        $pdo->exec("ALTER TABLE withdrawals ADD COLUMN budget_amount {$integer} NULL");
     }
 
     $count = (int) $pdo->query('SELECT COUNT(*) FROM bundles')->fetchColumn();

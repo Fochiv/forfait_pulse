@@ -39,7 +39,7 @@ require __DIR__ . '/header.php';
         <li>La documentation Bumxpress ne fournit pas d’endpoint de lecture du solde ; vérifiez-le dans le portail marchand.</li>
         <li>Une vente est confirmée uniquement par un webhook signé (ou une vérification serveur de l’état payin).</li>
         <li>La livraison du forfait est manuelle : la commande ne devient verte qu’après paiement confirmé et action « Livrer ».</li>
-        <li>Le mot de passe admin est vérifié avec <code>password_verify</code> à partir d’un hash stocké côté serveur.</li>
+        <li>Le mot de passe admin utilise le secret serveur <code>FORFAIT_PULSE_ADMIN_PASSWORD</code> s’il est défini, sinon un hash vérifié avec <code>password_verify</code>.</li>
     </ul>
 </section>
 <?php require __DIR__ . '/footer.php'; ?>

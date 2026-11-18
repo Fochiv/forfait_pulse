@@ -18,6 +18,8 @@
 .metric-label { display: block; color: var(--muted); font-size: .78rem; font-weight: 650; }
 .metric-value { display: block; margin-top: 8px; font-size: clamp(1.05rem, 3vw, 1.45rem); line-height: 1.2; font-weight: 850; }
 .metric-card.accent { border-color: #ffdec7; background: #fff7f0; }
+.metric-card.net { border-color: #c7ead5; background: #f0fbf4; }
+.metric-note { display: block; margin-top: 7px; color: var(--muted); font-size: .74rem; line-height: 1.35; }
 .admin-grid { display: grid; gap: 14px; }
 .admin-table-wrap { overflow-x: auto; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: .84rem; }

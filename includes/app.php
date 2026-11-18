@@ -3,9 +3,17 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/database.php';
 
+const PAYIN_FEE_RATE = 0.02;
+const PAYOUT_FEE_RATE = 0.015;
+
 function h(?string $value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function payout_net_amount(int $budgetAmount): int
+{
+    return max(0, (int) round($budgetAmount * (1 - PAYOUT_FEE_RATE), 0, PHP_ROUND_HALF_UP));
 }
 
 function money(int|float|string $amount): string

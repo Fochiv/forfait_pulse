@@ -7,6 +7,10 @@ $pdo = db();
 $adminActive = 'dashboard';
 $adminTitle = 'Vue d’ensemble';
 $revenue = (int) $pdo->query("SELECT COALESCE(SUM(amount), 0) FROM orders WHERE payment_status = 'paid'")->fetchColumn();
+$payinFeesStmt = $pdo->prepare("SELECT COALESCE(SUM(ROUND(amount * ?)), 0) FROM orders WHERE payment_status = 'paid'");
+$payinFeesStmt->execute([PAYIN_FEE_RATE]);
+$payinFees = (int) $payinFeesStmt->fetchColumn();
+$netRevenue = max(0, $revenue - $payinFees);
 $periodRevenue = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) FROM orders WHERE payment_status = 'paid' AND paid_at >= ?");
 $periodRevenue->execute([date('Y-m-d 00:00:00')]);
 $today = (int) $periodRevenue->fetchColumn();
@@ -30,6 +34,7 @@ require __DIR__ . '/header.php';
 <div class="admin-page-title"><div><h1>Vue d’ensemble</h1><p>Suivez les ventes et les commandes en un coup d’œil.</p></div><a class="admin-btn primary" href="/admin/retrait.php"><?= icon('wallet', 17) ?> Faire un retrait</a></div>
 <section class="metric-grid">
     <article class="metric-card accent"><span class="metric-label">Revenus bruts</span><strong class="metric-value"><?= money($revenue) ?></strong></article>
+    <article class="metric-card net"><span class="metric-label">Revenus après frais Payin (2 %)</span><strong class="metric-value"><?= money($netRevenue) ?></strong><span class="metric-note">Frais estimés : <?= money($payinFees) ?> · paiements confirmés uniquement</span></article>
     <article class="metric-card"><span class="metric-label">Ventes brutes du jour</span><strong class="metric-value"><?= money($today) ?></strong></article>
     <article class="metric-card"><span class="metric-label">Ventes brutes sur 7 jours</span><strong class="metric-value"><?= money($week) ?></strong></article>
     <article class="metric-card"><span class="metric-label">Ventes brutes du mois</span><strong class="metric-value"><?= money($month) ?></strong></article>

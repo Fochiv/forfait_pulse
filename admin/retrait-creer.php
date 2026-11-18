@@ -11,13 +11,18 @@ $last = trim((string) ($_POST['last_name'] ?? ''));
 $email = trim((string) ($_POST['email'] ?? ''));
 $phoneInput = trim((string) ($_POST['phone'] ?? ''));
 $operator = (string) ($_POST['operator'] ?? '');
-$amount = filter_var($_POST['amount'] ?? null, FILTER_VALIDATE_INT);
+$budgetAmount = filter_var($_POST['amount'] ?? null, FILTER_VALIDATE_INT);
 $digits = preg_replace('/\D+/', '', $phoneInput) ?? '';
 $phone = str_starts_with($phoneInput, '+') ? '+' . $digits : '+237' . ltrim($digits, '0');
 if ($first === '' || $last === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)
     || !preg_match('/^\+237[2368]\d{7,8}$/', $phone) || !in_array($operator, ['orange', 'mtn'], true)
-    || !$amount || $amount < 200 || $amount > 400000) {
-    flash('Vérifiez le bénéficiaire, son numéro, l’opérateur et un montant compris entre 200 et 400 000 FCFA.', 'error');
+    || !$budgetAmount || $budgetAmount < 203 || $budgetAmount > 400000) {
+    flash('Vérifiez le bénéficiaire, son numéro, l’opérateur et un budget compris entre 203 et 400 000 FCFA.', 'error');
+    redirect('/admin/retrait.php');
+}
+$sendAmount = payout_net_amount((int) $budgetAmount);
+if ($sendAmount < 200) {
+    flash('Le montant net après frais doit être d’au moins 200 FCFA.', 'error');
     redirect('/admin/retrait.php');
 }
 if (!bumxpress_is_configured()) {
@@ -28,8 +33,8 @@ if (!bumxpress_is_configured()) {
 $publicRef = 'P-' . date('ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 $name = trim($first . ' ' . $last);
 $pdo = db();
-$pdo->prepare("INSERT INTO withdrawals (public_ref, recipient_name, recipient_phone, recipient_email, operator_code, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'initiating', ?)")
-    ->execute([$publicRef, $name, $phone, $email, bumxpress_operator($operator), $amount, date('Y-m-d H:i:s')]);
+$pdo->prepare("INSERT INTO withdrawals (public_ref, recipient_name, recipient_phone, recipient_email, operator_code, amount, budget_amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'initiating', ?)")
+    ->execute([$publicRef, $name, $phone, $email, bumxpress_operator($operator), $sendAmount, $budgetAmount, date('Y-m-d H:i:s')]);
 $withdrawalId = (int) $pdo->lastInsertId();
 try {
     $customer = create_bumxpress_customer($publicRef, $name, $email, $phone, 'payout_customer_' . $publicRef);
@@ -42,7 +47,7 @@ try {
         'country_code' => 'CM',
         'operator_code' => bumxpress_operator($operator),
         'rail_type' => 'mobile_money',
-        'send_amount' => (string) $amount,
+        'send_amount' => (string) $sendAmount,
         'send_currency' => 'XAF',
     ], 'payout_quote_' . $publicRef);
     $quoteId = (string) ($quote['id'] ?? '');
